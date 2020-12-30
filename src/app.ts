@@ -97,6 +97,7 @@ class TesoroGramSE {
                     getKey(i);
                 }
             })
+            console.log(keys);
         }
         getKey(8)
     }
@@ -142,19 +143,12 @@ class TesoroGramSE {
     }
 }
 
-const tesoro = new TesoroGramSE(new HID.HID(HID.devices().filter(x => x.path && x.productId == 0x2057 && x.interface == 1 && x.path.includes("col05"))[0].path!));
 
-tesoro.changeProfile(profile.ProfileSelect.PC);
-let data: ProfileState = {
-    r: 240,
-    g: 50,
-    b: 0,
-    effect: profile.Effect.Spectrum,
-    effect_color: profile.EffectColor.Static
-} 
-tesoro.setProfileSettings(data) 
-//tesoro.setKeyColor('Q', 255, 255, 0);
-tesoro.setKeyColor('A', 0, 255, 0);
+
+export { TesoroGramSE, ProfileState }
+export { ProfileSelect, Brightness, Effect, EffectColor } from './profile';
+
+const tesoro = new TesoroGramSE(new HID.HID(HID.devices().filter(x => x.path && x.productId == 0x2057 && x.interface == 1 && x.path.includes("col05"))[0].path!));
 
 //tesoro.initKeys();
 
