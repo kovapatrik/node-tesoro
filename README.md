@@ -1,3 +1,14 @@
+## Installation
+
+It's a standard npm package, so you can install it with this command, if you are using npm:
+```
+npm install node-tesoro
+```
+or if you are using yarn:
+```
+yarn add node-tesoro
+```
+
 ## API
 
 ### `TesoroGramSE`
