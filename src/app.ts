@@ -66,7 +66,7 @@ class TesoroGramSE {
         }
     }
 
-    async initKeys() {
+    private async initKeys() {
 
         const q = [{
             name: "key",
@@ -145,5 +145,6 @@ class TesoroGramSE {
 
 
 
-export { TesoroGramSE, ProfileState }
+export default TesoroGramSE;
+export { ProfileState }
 export { ProfileSelect, Brightness, Effect, EffectColor } from './profile';
