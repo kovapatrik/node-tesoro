@@ -146,7 +146,5 @@ class TesoroGramSE {
     }
 }
 
-
-
 export { TesoroGramSE, ProfileState }
 export { ProfileSelect, Brightness, Effect, EffectColor } from './profile';

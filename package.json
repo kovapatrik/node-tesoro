@@ -1,7 +1,7 @@
 {
   "name": "node-tesoro",
-  "version": "0.1.5",
-  "main": "src/app.ts",
+  "version": "0.1.6",
+  "main": "lib/app.js",
   "description": "A project for controlling Tesoro GRAM SE Spectrum with node.js",
   "author": "Kovalovszky Patrik <kovapatrik@gmail.com> (https://github.com/kovapatrik)",
   "license": "MIT",
