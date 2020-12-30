@@ -1,6 +1,6 @@
 {
   "name": "node-tesoro",
-  "version": "0.1.9",
+  "version": "0.2.0",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "description": "A project for controlling Tesoro GRAM SE Spectrum with node.js",
