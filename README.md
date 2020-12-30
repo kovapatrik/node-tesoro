@@ -38,3 +38,7 @@ const keyboard = new TesoroGramSE(new HID.HID(HID.devices()
 
 - In an other project, I will create a GUI, that uses this API
 - (because in my opinion, the software that came with the keyboard is kind of poopoo)
+
+## Issues
+
+- If a profile's settings or a spektrum get updated, the Windows key will be locked (the official software's behaviour is the same)
