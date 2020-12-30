@@ -20,10 +20,11 @@ const keyboard = new TesoroGramSE(new HID.HID(HID.devices()
 
 - `data` - ProfileState - updates the current profile's state
 
-### `keyboard.setKeyColor(key, r, g, b)`
+### `keyboard.setKeyColor(key, r, g, b, e)`
 
-- `key` - string
-- `r,g,b` - number
+- `key` - string - key name from the dictionary
+- `r,g,b` - number - color for the key
+- `e` - SpectrumEffect - in case the user wants to change the effect
 -----
 
 ## General notes

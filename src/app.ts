@@ -4,7 +4,7 @@ import * as utils from "./utils";
 import * as profile from "./profile"
 import inquirer from 'inquirer'
 
-interface ProfileState{
+interface ProfileState {
     profile_num?: profile.ProfileSelect
     r?: number
     g?: number
@@ -13,10 +13,10 @@ interface ProfileState{
     brightness?: profile.Brightness
     effect_color?: profile.EffectColor
 };
-
 class TesoroGramSE {
     keyboard: HID.HID;
     profile_state : ProfileState;
+    spectrum_effect : spectrum.SpectrumEffect;
     constructor(keyboard : HID.HID) {
         this.keyboard = keyboard;
         this.profile_state = {
@@ -28,6 +28,7 @@ class TesoroGramSE {
             brightness: profile.Brightness.B100,
             effect_color: profile.EffectColor.Static
         }
+        this.spectrum_effect = spectrum.SpectrumEffect.Standard;
     }
 
     async changeProfile(profile_num: profile.ProfileSelect) {
@@ -102,7 +103,7 @@ class TesoroGramSE {
         getKey(8)
     }
 
-    async setKeyColor(key : string, r: number = 0, g: number = 0, b: number = 0) {
+    async setKeyColor(key : string, r: number = 0, g: number = 0, b: number = 0, e : spectrum.SpectrumEffect = this.spectrum_effect) {
         if (!(key in spectrum.KEYS)) {
             console.error('Key is not properly set.')
         } else {
@@ -112,7 +113,9 @@ class TesoroGramSE {
                 let middle_packet = utils.PACKET_MIDDLE.map((item) => {return item == 'profile' ? this.profile_state.profile_num : item;});
                 await this.sendCommand(utils.packetToByteArray(middle_packet), 'middlePacket');
             }
-            let endPacket = spectrum.PACKET_SPECTRUM_END.map((item) => {return item == 'profile' ? this.profile_state.profile_num : item;});
+
+            this.spectrum_effect = e;
+            let endPacket = spectrum.PACKET_SPECTRUM_END.map((item) => {return item == 'profile' ? this.profile_state.profile_num : item == 'effect' ? this.spectrum_effect : item;});
 
             let packet1 = spectrum.TEST_PACKET_SPECTRUM_1.map((item) => {return item == 'profile' ? this.profile_state.profile_num : item;});
             let packet2 = spectrum.PACKET_SPECTRUM_2.map((item) => {return item == 'profile' ? this.profile_state.profile_num : item;});
