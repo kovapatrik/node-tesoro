@@ -1,5 +1,3 @@
-A project for controlling Tesoro GRAM SE Spectrum with node.js
-
 ## API
 
 ### `TesoroGramSE`
