@@ -147,8 +147,3 @@ class TesoroGramSE {
 
 export { TesoroGramSE, ProfileState }
 export { ProfileSelect, Brightness, Effect, EffectColor } from './profile';
-
-const tesoro = new TesoroGramSE(new HID.HID(HID.devices().filter(x => x.path && x.productId == 0x2057 && x.interface == 1 && x.path.includes("col05"))[0].path!));
-
-//tesoro.initKeys();
-
