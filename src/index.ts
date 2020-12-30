@@ -1,7 +1,7 @@
 import HID from "node-hid";
-import * as spectrum from "./spectrum";
-import * as utils from "./utils";
-import * as profile from "./profile"
+import * as spectrum from "./spectrum.js";
+import * as utils from "./utils.js";
+import * as profile from "./profile.js"
 import inquirer from 'inquirer'
 
 interface ProfileState {
@@ -13,6 +13,7 @@ interface ProfileState {
     brightness?: profile.Brightness
     effect_color?: profile.EffectColor
 };
+
 class TesoroGramSE {
     keyboard: HID.HID;
     profile_state : ProfileState;
@@ -147,4 +148,4 @@ class TesoroGramSE {
 }
 
 export { TesoroGramSE, ProfileState }
-export { ProfileSelect, Brightness, Effect, EffectColor } from './profile';
+export { ProfileSelect, Brightness, Effect, EffectColor } from './profile.js';
