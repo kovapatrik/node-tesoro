@@ -9,6 +9,11 @@ or if you are using yarn:
 yarn add node-tesoro
 ```
 
+If you want to run your .ts file without building it, then you have to add an experimental node loader flag:
+```
+node --loader ts-node/esm ./my-script.ts
+```
+
 ## API
 
 ### `TesoroGramSE`
