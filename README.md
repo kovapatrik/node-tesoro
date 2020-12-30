@@ -40,4 +40,4 @@ const keyboard = new TesoroGramSE(new HID.HID(HID.devices()
 
 ## Issues
 
-- If a profile's settings or a spektrum get updated, the Windows key will be locked (the official software's behaviour is the same)
+- If a profile's settings or a spectrum gets updated, the Windows key will be locked (the official software's behaviour is the same)
