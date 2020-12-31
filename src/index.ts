@@ -2,6 +2,7 @@ import HID from "node-hid";
 import * as spectrum from "./spectrum";
 import * as utils from "./utils";
 import * as profile from "./profile"
+import * as packets from "./packets"
 import inquirer from 'inquirer'
 
 interface ProfileState {
@@ -14,10 +15,15 @@ interface ProfileState {
     effect_color?: profile.EffectColor
 };
 
+interface SpectrumState {
+    keys: typeof spectrum.KEYS,
+    effect: spectrum.SpectrumEffect
+};
+
 class TesoroGramSE {
     keyboard: HID.HID;
     profile_state : ProfileState;
-    spectrum_effect : spectrum.SpectrumEffect;
+    spectrum_state : SpectrumState;
     constructor(keyboard : HID.HID) {
         this.keyboard = keyboard;
         this.profile_state = {
@@ -29,33 +35,34 @@ class TesoroGramSE {
             brightness: profile.Brightness.B100,
             effect_color: profile.EffectColor.Static
         }
-        this.spectrum_effect = spectrum.SpectrumEffect.Standard;
+        this.spectrum_state = {
+            keys: spectrum.KEYS,
+            effect: spectrum.SpectrumEffect.Standard
+        }
     }
 
     async changeProfile(profile_num: profile.ProfileSelect) {
         if (profile_num === undefined) {
             console.error("You can't change the profile to NONE"!);
         } else {
-            let packet = profile.PACKET_CHANGE_PROFILE.map((item) => {return item == 'profile' ? profile_num : item;});
+            let packet = packets.PACKET_CHANGE_PROFILE.map((item) => {return item == 'profile' ? profile_num : item;});
             this.profile_state.profile_num = profile_num;
             await this.sendCommand(utils.packetToByteArray(packet), 'setProfile');
         }
     }
 
-    async setProfileSettings(data: ProfileState) {
+    async setProfileSettings(data: ProfileState = {profile_num: this.profile_state.profile_num}) {
         if (this.profile_state.profile_num === undefined) {
-            console.error('Profile cannot be set or is undefined');
-        } else if (!Object.values(data).every(x => x != undefined)){
-            console.error("Can't set properties to undefined");
+            console.error('Profile cannot be to undefined');
         } else {
-            let init_packet = utils.PACKET_INIT.map((item) => {return item == 'profile' ? this.profile_state.profile_num : item;});
+            let init_packet = packets.PACKET_INIT.map((item) => {return item == 'profile' ? this.profile_state.profile_num : item;});
             await this.sendCommand(utils.packetToByteArray(init_packet), 'initPacket');
             if (this.profile_state.profile_num != profile.ProfileSelect.PC) {
-                let middle_packet = utils.PACKET_MIDDLE.map((item) => {return item == 'profile' ? this.profile_state.profile_num : item;});
+                let middle_packet = packets.PACKET_MIDDLE.map((item) => {return item == 'profile' ? this.profile_state.profile_num : item;});
                 await this.sendCommand(utils.packetToByteArray(middle_packet), 'middlePacket');
             }
 
-            let settings_packet = profile.PACKET_PROFILE_SETTINGS;
+            let settings_packet = packets.PACKET_PROFILE_SETTINGS;
 
             this.profile_state = {...this.profile_state, ...data};
 
@@ -75,15 +82,15 @@ class TesoroGramSE {
             message: "Which key?"
         }];
 
-        let init_packet = utils.PACKET_INIT.map((item) => {return item == 'profile' ? this.profile_state.profile_num : item;});
-        let middle_packet = utils.PACKET_MIDDLE.map((item) => {return item == 'profile' ? this.profile_state.profile_num : item;});
-        let endPacket = spectrum.PACKET_SPECTRUM_END.map((item) => {return item == 'profile' ? this.profile_state.profile_num : item;});
+        let init_packet = packets.PACKET_INIT.map((item) => {return item == 'profile' ? this.profile_state.profile_num : item;});
+        let middle_packet = packets.PACKET_MIDDLE.map((item) => {return item == 'profile' ? this.profile_state.profile_num : item;});
+        let endPacket = packets.PACKET_SPECTRUM_END.map((item) => {return item == 'profile' ? this.profile_state.profile_num : item;});
 
         
-        let packet2 = spectrum.PACKET_SPECTRUM_2.map((item) => {return item == 'profile' ? this.profile_state.profile_num : item;});
+        let packet2 = packets.PACKET_SPECTRUM_2.map((item) => {return item == 'profile' ? this.profile_state.profile_num : item;});
         let keys  :{ [key: string]: number } ={}
         const getKey = async (i: number) => {
-            let packet1 = spectrum.TEST_PACKET_SPECTRUM_1.map((item) => {return item == 'profile' ? this.profile_state.profile_num : item;});
+            let packet1 = packets.PACKET_SPECTRUM_1.map((item) => {return item == 'profile' ? this.profile_state.profile_num : item;});
             packet1[i] = 255;
             await this.sendCommand(utils.packetToByteArray(init_packet), 'initPacket');
             await this.sendCommand(utils.packetToByteArray(middle_packet), 'middlePacket');
@@ -104,27 +111,36 @@ class TesoroGramSE {
         getKey(8)
     }
 
-    async setKeyColor(key : string, r: number = 0, g: number = 0, b: number = 0, e : spectrum.SpectrumEffect = this.spectrum_effect) {
-        if (!(key in spectrum.KEYS)) {
-            console.error('Key is not properly set.')
+    async setKeyColor(key : string|undefined = undefined, r: number = 0, g: number = 0, b: number = 0, e : spectrum.SpectrumEffect|undefined = undefined) {
+        if (key === undefined && e === undefined) {
+            console.log('There is nothing to do. Either you set key or spectrum effect to something.');
+        } else if (!(key! in spectrum.KEYS)) {
+            console.error('Key is not in the dictionary.')
         } else {
-            let init_packet = utils.PACKET_INIT.map((item) => {return item == 'profile' ? this.profile_state.profile_num : item;});
+            let init_packet = packets.PACKET_INIT.map((item) => {return item == 'profile' ? this.profile_state.profile_num : item;});
             await this.sendCommand(utils.packetToByteArray(init_packet), 'initPacket');
             if (this.profile_state.profile_num != profile.ProfileSelect.PC) {
-                let middle_packet = utils.PACKET_MIDDLE.map((item) => {return item == 'profile' ? this.profile_state.profile_num : item;});
+                let middle_packet = packets.PACKET_MIDDLE.map((item) => {return item == 'profile' ? this.profile_state.profile_num : item;});
                 await this.sendCommand(utils.packetToByteArray(middle_packet), 'middlePacket');
             }
 
-            this.spectrum_effect = e;
-            let endPacket = spectrum.PACKET_SPECTRUM_END.map((item) => {return item == 'profile' ? this.profile_state.profile_num : item == 'effect' ? this.spectrum_effect : item;});
+            this.spectrum_state.effect = e ? e : this.spectrum_state.effect;
+            let endPacket = packets.PACKET_SPECTRUM_END.map((item) => {return item == 'profile' ? this.profile_state.profile_num : item == 'effect' ? this.spectrum_state.effect : item;});
 
-            let packet1 = spectrum.TEST_PACKET_SPECTRUM_1.map((item) => {return item == 'profile' ? this.profile_state.profile_num : item;});
-            let packet2 = spectrum.PACKET_SPECTRUM_2.map((item) => {return item == 'profile' ? this.profile_state.profile_num : item;});
+            let packet1 = packets.PACKET_SPECTRUM_1.map((item) => {return item == 'profile' ? this.profile_state.profile_num : item;});
+            let packet2 = packets.PACKET_SPECTRUM_2.map((item) => {return item == 'profile' ? this.profile_state.profile_num : item;});
 
-            let key_pos = spectrum.KEYS[key];
-            packet1[key_pos] = r;
-            packet1[key_pos + 128] = g;
-            packet2[key_pos] = b;
+            if (key !== undefined) {
+                this.spectrum_state.keys[key].r = r;
+                this.spectrum_state.keys[key].g = g;
+                this.spectrum_state.keys[key].b = b;
+            }
+
+            for (const k of Object.values(this.spectrum_state.keys)) {
+                packet1[k.index] = k.r;
+                packet1[k.index + 128] = k.g;
+                packet2[k.index] = k.b;
+            }
 
             await this.sendCommand(utils.packetToByteArray(packet1), 'spectrum1Packet', 150);
             await this.sendCommand(utils.packetToByteArray(packet2), 'spectrum2Packet'); 
@@ -148,4 +164,5 @@ class TesoroGramSE {
 }
 
 export { TesoroGramSE, ProfileState }
-export { ProfileSelect, Brightness, Effect, EffectColor } from './profile';
+export * as Profile from './profile';
+export * as Spectrum from './spectrum';
