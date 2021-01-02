@@ -3,7 +3,10 @@ import * as spectrum from "./spectrum";
 import * as utils from "./utils";
 import * as profile from "./profile"
 import * as packets from "./packets"
+import { Layouts, Layout } from "./layouts/layouts";
 import inquirer from 'inquirer'
+
+const layouts = new Layouts;
 
 interface ProfileState {
     profile_num?: profile.ProfileSelect
@@ -15,30 +18,28 @@ interface ProfileState {
     effect_color?: profile.EffectColor
 };
 
-interface SpectrumState {
-    keys: typeof spectrum.KEYS,
-    effect: spectrum.SpectrumEffect
-};
+const init_pstate : ProfileState = {
+    profile_num: profile.ProfileSelect.Profile1,
+    r: 243,
+    g: 152,
+    b: 0,
+    effect: profile.Effect.Standard,
+    brightness: profile.Brightness.B100,
+    effect_color: profile.EffectColor.Static
+}
 
 class TesoroGramSE {
     keyboard: HID.HID;
     profile_state : ProfileState;
-    spectrum_state : SpectrumState;
-    constructor(keyboard : HID.HID) {
+    keys: Layout['key_index'];
+    layout_str: Layout['layout'];
+    spectrum_effect: spectrum.SpectrumEffect;
+    constructor(keyboard : HID.HID, layout: string, pstate: ProfileState = init_pstate, keys = layouts.get(layout).key_index) {
         this.keyboard = keyboard;
-        this.profile_state = {
-            profile_num: profile.ProfileSelect.Profile1,
-            r: 243,
-            g: 152,
-            b: 0,
-            effect: profile.Effect.Standard,
-            brightness: profile.Brightness.B100,
-            effect_color: profile.EffectColor.Static
-        }
-        this.spectrum_state = {
-            keys: spectrum.KEYS,
-            effect: spectrum.SpectrumEffect.Standard
-        }
+        this.profile_state = pstate;
+        this.spectrum_effect = spectrum.SpectrumEffect.Standard;
+        this.keys = keys,
+        this.layout_str = layouts.get(layout).layout;
     }
 
     async changeProfile(profile_num: profile.ProfileSelect) {
@@ -114,7 +115,7 @@ class TesoroGramSE {
     async setKeyColor(key : string|undefined = undefined, r: number = 0, g: number = 0, b: number = 0, e : spectrum.SpectrumEffect|undefined = undefined) {
         if (key === undefined && e === undefined) {
             console.log('There is nothing to do. Either you set key or spectrum effect to something.');
-        } else if (!(key! in spectrum.KEYS)) {
+        } else if (!(key! in this.keys)) {
             console.error('Key is not in the dictionary.')
         } else {
             let init_packet = packets.PACKET_INIT.map((item) => {return item == 'profile' ? this.profile_state.profile_num : item;});
@@ -124,19 +125,19 @@ class TesoroGramSE {
                 await this.sendCommand(utils.packetToByteArray(middle_packet), 'middlePacket');
             }
 
-            this.spectrum_state.effect = e ? e : this.spectrum_state.effect;
-            let endPacket = packets.PACKET_SPECTRUM_END.map((item) => {return item == 'profile' ? this.profile_state.profile_num : item == 'effect' ? this.spectrum_state.effect : item;});
+            this.spectrum_effect = e ? e : this.spectrum_effect;
+            let endPacket = packets.PACKET_SPECTRUM_END.map((item) => {return item == 'profile' ? this.profile_state.profile_num : item == 'effect' ? this.spectrum_effect : item;});
 
             let packet1 = packets.PACKET_SPECTRUM_1.map((item) => {return item == 'profile' ? this.profile_state.profile_num : item;});
             let packet2 = packets.PACKET_SPECTRUM_2.map((item) => {return item == 'profile' ? this.profile_state.profile_num : item;});
 
             if (key !== undefined) {
-                this.spectrum_state.keys[key].r = r;
-                this.spectrum_state.keys[key].g = g;
-                this.spectrum_state.keys[key].b = b;
+                this.keys[key].r = r;
+                this.keys[key].g = g;
+                this.keys[key].b = b;
             }
 
-            for (const k of Object.values(this.spectrum_state.keys)) {
+            for (const k of Object.values(this.keys)) {
                 packet1[k.index] = k.r;
                 packet1[k.index + 128] = k.g;
                 packet2[k.index] = k.b;
