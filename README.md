@@ -51,11 +51,15 @@ const keyboard = new TesoroGramSE(new HID.HID(HID.devices()
 
 ## General notes
 
+### Compatibility
+- Because it communicates with a HID device it cannot be used directly in a browser-based project
+- It has to be exposed as an API from a server
+
 ### Key dictionary
 
 - The current key dictionary contains a Hungarian, 105 keys layout
 - It can be updated to accept more layouts, please create a pull request if you want to update.
-- You can use the function from `devtools.ts` with the instructions to get your keyboard's key indexes
+- You can use the private function `initKeys` to get your keyboard's key indexes
 
 ### GUI
 
