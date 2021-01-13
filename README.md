@@ -41,6 +41,12 @@ const keyboard = new TesoroGramSE(new HID.HID(HID.devices()
 - `key` - string - key name from the dictionary
 - `r,g,b` - number - color for the key
 - `e` - SpectrumEffect - in case the user wants to change the effect
+
+### `keyboard.sendSpectrumSettings()`
+- sends the current spectrum state to the keyboard
+  
+### `keyboard.sendProfileSettings()`
+- sends the current profile state to the keyboard
 -----
 
 ## General notes
