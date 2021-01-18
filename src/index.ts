@@ -169,5 +169,6 @@ class TesoroGramSE {
     }
 }
 
+export { TesoroGramSE, ProfileState }
 export * as Profile from './profile';
 export * as Spectrum from './spectrum';
