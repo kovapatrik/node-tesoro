@@ -12,6 +12,22 @@ function hexToBytes(hex : string) {
     return bytes;
 }
 
+function inputBufferToData(input: Buffer) {
+    const data = input.toJSON().data;
+
+    switch (data[1]) {
+        case 3:
+            return {'_id': data[6]};
+        case 4:
+            return {'effect': data[7]}
+        case 12:
+            return {'effect_color': data[2]};
+        case 13:
+            return {'brightness': data[2]};
+    }
+}
+
 export {
-    packetToByteArray
+    packetToByteArray,
+    inputBufferToData
 } 

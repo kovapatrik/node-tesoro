@@ -34,12 +34,19 @@ class TesoroGramSE {
     keys: Layout['key_index'];
     layout_str: Layout['layout'];
     spectrum_effect: spectrum.SpectrumEffect;
-    constructor(keyboard : HID.HID, layout: string, pstate: ProfileState = init_pstate, keys = layouts.get(layout).key_index) {
-        this.keyboard = keyboard;
+    constructor(layout: string, callback?: Function, pstate: ProfileState = init_pstate) {
+        const devices = HID.devices();
+        this.keyboard = new HID.HID(devices.filter(x => x.path && x.productId == 0x2057 && x.interface == 1 && x.path.includes("col05"))[0].path!);
         this.profile_state = pstate;
         this.spectrum_effect = spectrum.SpectrumEffect.Standard;
-        this.keys = keys,
+        this.keys = layouts.get(layout).key_index,
         this.layout_str = layouts.get(layout).layout;
+        if (callback) {
+            const listener = new HID.HID(devices.filter(x => x.path && x.productId == 0x2057 && x.interface == 2)[0].path!);
+            listener.on('data', (data) => {
+                callback(utils.inputBufferToData(data));
+            });
+        }
     }
 
     async changeProfile(_id: profile.ProfileSelect) {
@@ -155,13 +162,12 @@ class TesoroGramSE {
                 if (i < 136) {
                     getKey(i);
                 }
-            })
+            });
             console.log(keys);
         }
         getKey(8)
     }
 }
 
-export { TesoroGramSE, ProfileState }
 export * as Profile from './profile';
 export * as Spectrum from './spectrum';

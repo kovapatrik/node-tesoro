@@ -17,15 +17,19 @@ yarn add node-tesoro
 import HID from 'node-hid';
 import { TesoroGramSE, Profile, Spectrum, ProfileState } from 'node-tesoro';
 
-const keyboard = new TesoroGramSE(new HID.HID(HID.devices()
-                  .filter(x => x.path && x.productId == 0x2057 && x.interface == 1 && x.path.includes("col05"))[0].path!), 
-                  'hungarian');
+function handleChange(data:any) {
+  console.log(data);
+}
+
+const keyboard = new TesoroGramSE('hungarian', handleChange);
 ```
 
-- `keyboard` - HID - the HID interface of the keyboard
 - `layout` - string - a string which is in the layouts: it provides the key indexes for the spectrum, and a keyboard layout for future usage
   - Possible values:
     - hungarian
+- `callback` - function|optional - a callback function which called after a keyboard event happened (e.g.: switching profile or brightness on the keyboard)
+  - the function has to have 1 parameter
+  - the data format is JSON, like {'brightness', 1}
 - `profile_state` - ProfileState|optional - the init profile state, it has a default, but you can override it
 
 ### `keyboard.changeProfile(profile_num)`
