@@ -28,7 +28,7 @@ const keyboard = new TesoroGramSE('hungarian', handleChange);
   - Possible values:
     - hungarian
 - `callback` - function|optional - a callback function which called after a keyboard event happened (e.g.: switching profile or brightness on the keyboard)
-  - the function has to have 1 parameter
+  - the function must have 1 parameter
   - the data format is JSON, like {'brightness', 1}
 - `profile_state` - ProfileState|optional - the init profile state, it has a default, but you can override it
 
@@ -53,6 +53,10 @@ const keyboard = new TesoroGramSE('hungarian', handleChange);
 - sends the current profile state to the keyboard
 -----
 
+## GUI
+
+- I created a GUI for this API in React, you can check it [here](https://github.com/kovapatrik/node-tesoro-gui)
+
 ## General notes
 
 ### Compatibility
@@ -64,11 +68,6 @@ const keyboard = new TesoroGramSE('hungarian', handleChange);
 - The current key dictionary contains a Hungarian, 105 keys layout
 - It can be updated to accept more layouts, please create a pull request if you want to update.
 - You can use the private function `initKeys` to get your keyboard's key indexes
-
-### GUI
-
-- In an other project, I will create a GUI, that uses this API
-- (because in my opinion, the software that came with the keyboard is kind of poopoo)
 
 ## Issues
 
