@@ -1,8 +1,17 @@
 import hungarian from "./hungarian";
 
-export declare interface Layout {
+
+interface SimpleLayout {
+    layout: {
+        default: string[],
+        shift?: string[],
+    },
+    display?: object
+}
+
+export interface Layout {
     key_index: { [key: string]: { index: number; r: number; g: number; b: number; } },
-    layout: string[]
+    gui: { main: SimpleLayout; controlPad?: SimpleLayout; arrows?: SimpleLayout; numPad?: SimpleLayout; numPadEnd?:SimpleLayout;}
 }
 
 export class Layouts  {

@@ -32,7 +32,7 @@ class TesoroGramSE {
     keyboard: HID.HID;
     profile_state : ProfileState;
     keys: Layout['key_index'];
-    layout_str: Layout['layout'];
+    layout_str: Layout['gui'];
     spectrum_effect: spectrum.SpectrumEffect;
     constructor(layout: string, callback?: Function, pstate: ProfileState = init_pstate) {
         const devices = HID.devices();
@@ -40,7 +40,7 @@ class TesoroGramSE {
         this.profile_state = pstate;
         this.spectrum_effect = spectrum.SpectrumEffect.Standard;
         this.keys = layouts.get(layout).key_index,
-        this.layout_str = layouts.get(layout).layout;
+        this.layout_str = layouts.get(layout).gui;
         if (callback) {
             const listener = new HID.HID(devices.filter(x => x.path && x.productId == 0x2057 && x.interface == 2)[0].path!);
             listener.on('data', (data) => {
@@ -83,17 +83,17 @@ class TesoroGramSE {
             await this.sendCommand(utils.packetToByteArray(settings_packet), 'settingsPacket', 280);
     }
 
-    setKeyColor(key : string|undefined = undefined, r: number = 0, g: number = 0, b: number = 0, e : spectrum.SpectrumEffect|undefined = undefined) {
-        if (key === undefined && e === undefined) {
+    setSpectrumSettings(change_keys : {[key: string] : {index?:number; r:number; g: number; b: number;}}, e : spectrum.SpectrumEffect|undefined = undefined) {
+        if (change_keys === undefined && e === undefined) {
             console.log('There is nothing to do. Either you set key or spectrum effect to something.');
-        } else if (!(key! in this.keys)) {
-            console.error('Key is not in the dictionary.')
         } else {
-            this.spectrum_effect = e ? e : this.spectrum_effect;
-            if (key !== undefined) {
-                this.keys[key].r = r;
-                this.keys[key].g = g;
-                this.keys[key].b = b;
+            this.spectrum_effect = e !== undefined ? e : this.spectrum_effect;
+            for (const [key, color] of Object.entries(change_keys)) {
+                if (key !== undefined && Object.keys(this.keys).includes(key)) {
+                    this.keys[key].r = color.r;
+                    this.keys[key].g = color.g;
+                    this.keys[key].b = color.b;
+                }
             }
         }
     }

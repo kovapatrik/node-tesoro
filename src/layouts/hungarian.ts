@@ -117,7 +117,76 @@ const hungarian : Layout = {
         "NumEnter": {index: 116, r: 0, g: 0, b: 0},
         "Num+": {index: 119, r: 0, g: 0, b: 0}
     },
-    layout : ['abc']
+    gui : {
+        main: {
+            layout: {
+                default: ["Esc F1 F2 F3 F4 F5 F6 F7 F8 F9 F10 F11 F12",
+                "0 1 2 3 4 5 6 7 8 9 Ö Ü Ó Backspace",
+                "Tab Q W E R T Z U I O P Ő Ú",
+                "Caps A S D F G H J K L É Á Ű Enter",
+                "LShift Í Y X C V B N M , . - RShift",
+                "LCtrl Win Alt Space AltGr Fn RMB RCtrl"],
+            },
+            display: {
+                "Backspace": "⌫",
+                "LShift": "⇧",
+                "RShift": "⇧",
+                "LCtrl": "Ctrl",
+                "RCtrl": "Ctrl",
+                "Win": "⊞",
+                "RMB": "≣",
+                "Space": ''
+            }
+        },
+        controlPad: {
+            layout: {
+                default: [
+                    "PrtSc ScrLk Pause",
+                    "Ins Home PgUp",
+                    "Del End PgDn"
+                ],
+            }
+        },
+        numPad: {
+            layout: {
+                default: [
+                    "NumLk Num/ Num*",
+                    "Num7 Num8 Num9",
+                    "Num4 Num5 Num6",
+                    "Num1 Num2 Num3",
+                    "Num0 Num,"
+                    ],
+            },
+            display: {
+                "Num/": '/',
+                "Num*": '*',
+                "Num0": '0',
+                "Num1": '1',
+                "Num2": '2',
+                "Num3": '3',
+                "Num4": '4',
+                "Num5": '5',
+                "Num6": '6',
+                "Num7": '7',
+                "Num8": '8',
+                "Num9": '9',
+                "Num,": ','
+            }
+        },
+        numPadEnd: {
+            layout: {
+                default: ["{numpadsubtract}", "{numpadadd}", "{numpadenter}"]
+            },
+            display: {
+                "{numpadenter}": "Enter"
+            }
+        },
+        arrows: {
+            layout: {
+                default: ["{arrowup}", "{arrowleft} {arrowdown} {arrowright}"]
+            }
+        }
+    }
 }
 
 export default hungarian;
