@@ -10,37 +10,31 @@ const layouts = new Layouts;
 
 interface ProfileState {
     _id?: profile.ProfileSelect
-    r?: number
-    g?: number
-    b?: number
-    effect?: profile.Effect
-    brightness?: profile.Brightness
-    effect_color?: profile.EffectColor
+    r: number
+    g: number
+    b: number
+    effect: profile.Effect
+    brightness: profile.Brightness
+    effect_color: profile.EffectColor
 };
 
-const init_pstate : ProfileState = {
-    _id: profile.ProfileSelect.Profile1,
-    r: 243,
-    g: 152,
-    b: 0,
-    effect: profile.Effect.Standard,
-    brightness: profile.Brightness.B100,
-    effect_color: profile.EffectColor.Static
+interface SpectrumState {
+    _id?: string;
+    effect: spectrum.Effect;
+    keys: Layout['key_index'];
 }
 
 class TesoroGramSE {
     keyboard: HID.HID;
-    profile_state : ProfileState;
     keys: Layout['key_index'];
     layout_str: Layout['gui'];
-    spectrum_effect: spectrum.SpectrumEffect;
-    constructor(layout: string, callback?: Function, pstate: ProfileState = init_pstate) {
+    profile_id: profile.ProfileSelect;
+    constructor(layout: string, callback?: Function, profile_id = profile.ProfileSelect.Profile1) {
         const devices = HID.devices();
         this.keyboard = new HID.HID(devices.filter(x => x.path && x.productId == 0x2057 && x.interface == 1 && x.path.includes("col05"))[0].path!);
-        this.profile_state = pstate;
-        this.spectrum_effect = spectrum.SpectrumEffect.Standard;
         this.keys = layouts.get(layout).key_index,
         this.layout_str = layouts.get(layout).gui;
+        this.profile_id = profile_id;
         if (callback) {
             const listener = new HID.HID(devices.filter(x => x.path && x.productId == 0x2057 && x.interface == 2)[0].path!);
             listener.on('data', (data) => {
@@ -51,31 +45,27 @@ class TesoroGramSE {
 
     async changeProfile(_id: profile.ProfileSelect) {
         if (_id === undefined) {
-            console.error("You can't change the profile to NONE"!);
+            console.error("You can't change the profile to none!");
         } else {
             let packet = packets.PACKET_CHANGE_PROFILE.map((item) => {return item == 'profile' ? _id : item;});
-            this.profile_state._id = _id;
+            this.profile_id = _id;
             await this.sendCommand(utils.packetToByteArray(packet), 'setProfile');
         }
     }
 
-    setProfileSettings(data: ProfileState = {_id: this.profile_state._id}) {
-        if (this.profile_state._id === undefined) {
-            console.error('Profile cannot be to undefined');
-        } else {
-            this.profile_state = {...this.profile_state, ...data};
-        }
-    }
+    async sendProfileSettings(profileState : ProfileState) {
 
-    async sendProfileSettings() {
-        let init_packet = packets.PACKET_INIT.map((item) => {return item == 'profile' ? this.profile_state._id : item;});
+        if (profileState._id !== this.profile_id) {
+            await this.changeProfile(profileState._id!);
+        }
+        let init_packet = packets.PACKET_INIT.map((item) => {return item == 'profile' ? profileState._id : item;});
             await this.sendCommand(utils.packetToByteArray(init_packet), 'initPacket');
-            if (this.profile_state._id != profile.ProfileSelect.PC) {
-                let middle_packet = packets.PACKET_MIDDLE.map((item) => {return item == 'profile' ? this.profile_state._id : item;});
+            if (profileState._id !== profile.ProfileSelect.PC) {
+                let middle_packet = packets.PACKET_MIDDLE.map((item) => {return item == 'profile' ? profileState._id : item;});
                 await this.sendCommand(utils.packetToByteArray(middle_packet), 'middlePacket');
             }
             let settings_packet = packets.PACKET_PROFILE_SETTINGS;
-            for(const d of Object.entries(this.profile_state)) {
+            for(const d of Object.entries(profileState)) {
                 const param = d[0];
                 const value = d[1];
                 settings_packet = settings_packet.map((item) => {return item == param ? value : item;});
@@ -83,33 +73,19 @@ class TesoroGramSE {
             await this.sendCommand(utils.packetToByteArray(settings_packet), 'settingsPacket', 280);
     }
 
-    setSpectrumSettings(change_keys : {[key: string] : {index?:number; r:number; g: number; b: number;}}, e : spectrum.SpectrumEffect|undefined = undefined) {
-        if (change_keys === undefined && e === undefined) {
-            console.log('There is nothing to do. Either you set key or spectrum effect to something.');
-        } else {
-            this.spectrum_effect = e !== undefined ? e : this.spectrum_effect;
-            for (const [key, color] of Object.entries(change_keys)) {
-                if (key !== undefined && Object.keys(this.keys).includes(key)) {
-                    this.keys[key].r = color.r;
-                    this.keys[key].g = color.g;
-                    this.keys[key].b = color.b;
-                }
-            }
-        }
-    }
+    async sendSpectrumSettings(spectrumState : SpectrumState) {
 
-    async sendSpectrumSettings() {
-        let init_packet = packets.PACKET_INIT.map((item) => {return item == 'profile' ? this.profile_state._id : item;});
+        let init_packet = packets.PACKET_INIT.map((item) => {return item == 'profile' ? this.profile_id : item;});
         await this.sendCommand(utils.packetToByteArray(init_packet), 'initPacket');
-        if (this.profile_state._id != profile.ProfileSelect.PC) {
-            let middle_packet = packets.PACKET_MIDDLE.map((item) => {return item == 'profile' ? this.profile_state._id : item;});
+        if (this.profile_id !== profile.ProfileSelect.PC) {
+            let middle_packet = packets.PACKET_MIDDLE.map((item) => {return item == 'profile' ? this.profile_id : item;});
             await this.sendCommand(utils.packetToByteArray(middle_packet), 'middlePacket');
         }
-        let endPacket = packets.PACKET_SPECTRUM_END.map((item) => {return item == 'profile' ? this.profile_state._id : item == 'effect' ? this.spectrum_effect : item;});
+        let endPacket = packets.PACKET_SPECTRUM_END.map((item) => {return item == 'profile' ? this.profile_id : item == 'effect' ? spectrumState.effect : item;});
 
-        let packet1 = packets.PACKET_SPECTRUM_1.map((item) => {return item == 'profile' ? this.profile_state._id : item;});
-        let packet2 = packets.PACKET_SPECTRUM_2.map((item) => {return item == 'profile' ? this.profile_state._id : item;});
-        for (const k of Object.values(this.keys)) {
+        let packet1 = packets.PACKET_SPECTRUM_1.map((item) => {return item == 'profile' ? this.profile_id : item;});
+        let packet2 = packets.PACKET_SPECTRUM_2.map((item) => {return item == 'profile' ? this.profile_id : item;});
+        for (const k of Object.values(spectrumState.keys)) {
             packet1[k.index] = k.r;
             packet1[k.index + 128] = k.g;
             packet2[k.index] = k.b;
@@ -139,15 +115,15 @@ class TesoroGramSE {
             message: "Which key?"
         }];
 
-        let init_packet = packets.PACKET_INIT.map((item) => {return item == 'profile' ? this.profile_state._id : item;});
-        let middle_packet = packets.PACKET_MIDDLE.map((item) => {return item == 'profile' ? this.profile_state._id : item;});
-        let endPacket = packets.PACKET_SPECTRUM_END.map((item) => {return item == 'profile' ? this.profile_state._id : item;});
+        let init_packet = packets.PACKET_INIT.map((item) => {return item == 'profile' ? this.profile_id : item;});
+        let middle_packet = packets.PACKET_MIDDLE.map((item) => {return item == 'profile' ? this.profile_id : item;});
+        let endPacket = packets.PACKET_SPECTRUM_END.map((item) => {return item == 'profile' ? this.profile_id : item;});
 
         
-        let packet2 = packets.PACKET_SPECTRUM_2.map((item) => {return item == 'profile' ? this.profile_state._id : item;});
+        let packet2 = packets.PACKET_SPECTRUM_2.map((item) => {return item == 'profile' ? this.profile_id : item;});
         let keys  :{ [key: string]: number } ={}
         const getKey = async (i: number) => {
-            let packet1 = packets.PACKET_SPECTRUM_1.map((item) => {return item == 'profile' ? this.profile_state._id : item;});
+            let packet1 = packets.PACKET_SPECTRUM_1.map((item) => {return item == 'profile' ? this.profile_id : item;});
             packet1[i] = 255;
             await this.sendCommand(utils.packetToByteArray(init_packet), 'initPacket');
             await this.sendCommand(utils.packetToByteArray(middle_packet), 'middlePacket');
@@ -169,6 +145,6 @@ class TesoroGramSE {
     }
 }
 
-export { TesoroGramSE, ProfileState }
+export { TesoroGramSE, ProfileState, SpectrumState}
 export * as Profile from './profile';
 export * as Spectrum from './spectrum';

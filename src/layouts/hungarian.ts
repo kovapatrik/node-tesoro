@@ -70,7 +70,7 @@ const hungarian : Layout = {
         "N": {index: 12, r: 0, g: 0, b: 0},
         "M": {index: 92, r: 0, g: 0, b: 0},
         ",": {index: 84, r: 0, g: 0, b: 0},
-        ".": {index: 85, r: 0, g: 0, b: 0},
+        "dot": {index: 85, r: 0, g: 0, b: 0},
         "-": {index: 76, r: 0, g: 0, b: 0},
         "RShift": {index: 71, r: 0, g: 0, b: 0},
 
@@ -124,7 +124,7 @@ const hungarian : Layout = {
                 "0 1 2 3 4 5 6 7 8 9 Ö Ü Ó Backspace",
                 "Tab Q W E R T Z U I O P Ő Ú",
                 "Caps A S D F G H J K L É Á Ű Enter",
-                "LShift Í Y X C V B N M , . - RShift",
+                "LShift Í Y X C V B N M , dot - RShift",
                 "LCtrl Win Alt Space AltGr Fn RMB RCtrl"],
             },
             display: {
@@ -135,7 +135,7 @@ const hungarian : Layout = {
                 "RCtrl": "Ctrl",
                 "Win": "⊞",
                 "RMB": "≣",
-                "Space": ''
+                'dot': '.'
             }
         },
         controlPad: {
