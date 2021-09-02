@@ -25,13 +25,15 @@ interface SpectrumState {
 }
 
 class TesoroGramSE {
-    keyboard: HID.HID;
+    keyboard?: HID.HID;
     keys: Layout['key_index'];
     layout_str: Layout['gui'];
     profile_id: profile.ProfileSelect;
-    constructor(layout: string, callback?: Function, profile_id = profile.ProfileSelect.Profile1) {
+    development: boolean;
+    constructor(layout: string, callback?: Function, profile_id = profile.ProfileSelect.Profile1, development = false) {
         const devices = HID.devices();
-        this.keyboard = new HID.HID(devices.filter(x => x.path && x.productId == 0x2057 && x.interface == 1 && x.path.includes("col05"))[0].path!);
+        this.development = development;
+        this.keyboard = this.development ? undefined : new HID.HID(devices.filter(x => x.path && x.productId == 0x2057 && x.interface == 1 && x.path.includes("col05"))[0].path!);
         this.keys = layouts.get(layout).key_index,
         this.layout_str = layouts.get(layout).gui;
         this.profile_id = profile_id;
@@ -98,8 +100,11 @@ class TesoroGramSE {
     private sendCommand(data : number[], type: string, to: number = 10) : Promise<number> {
         return new Promise((res, rej) => {
             try {
+                if (this.development) {
+                    throw 'You cannot send commands to the keyboard in development mode!'
+                }
                 setTimeout(() => {
-                    this.keyboard.sendFeatureReport(data);
+                    this.keyboard!.sendFeatureReport(data);
                     res(1);
                 }, to)
             } catch(e) {
