@@ -28,19 +28,24 @@ class TesoroGramSE {
     keyboard?: HID.HID;
     keys: Layout['key_index'];
     layout_str: Layout['gui'];
-    profile_id: profile.ProfileSelect;
-    development: boolean;
-    constructor({layout, callback, profile_id = profile.ProfileSelect.Profile1, development = false}: {layout: string, callback?: Function, profile_id: profile.ProfileSelect, development: boolean}) {
+
+    layout!: string;
+    profile_id: profile.ProfileSelect = profile.ProfileSelect.Profile1;
+    development: boolean = false;
+    callback?: Function;
+
+    constructor(init : {layout: string, callback?: Function, profile_id?: profile.ProfileSelect, development?: boolean}) {
+        Object.assign(this, init);
+
         const devices = HID.devices();
-        this.development = development;
         this.keyboard = this.development ? undefined : new HID.HID(devices.filter(x => x.path && x.productId == 0x2057 && x.interface == 1 && x.path.includes("col05"))[0].path!);
-        this.keys = layouts.get(layout).key_index,
-        this.layout_str = layouts.get(layout).gui;
-        this.profile_id = profile_id;
-        if (callback) {
+        this.keys = layouts.get(this.layout).key_index,
+        this.layout_str = layouts.get(this.layout).gui;
+        this.profile_id = this.profile_id;
+        if (this.callback) {
             const listener = new HID.HID(devices.filter(x => x.path && x.productId == 0x2057 && x.interface == 2)[0].path!);
             listener.on('data', (data) => {
-                callback(utils.inputBufferToData(data));
+                this.callback!(utils.inputBufferToData(data));
             });
         }
     }
