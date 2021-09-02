@@ -30,7 +30,7 @@ class TesoroGramSE {
     layout_str: Layout['gui'];
     profile_id: profile.ProfileSelect;
     development: boolean;
-    constructor(layout: string, callback?: Function, profile_id = profile.ProfileSelect.Profile1, development = false) {
+    constructor({layout, callback, profile_id = profile.ProfileSelect.Profile1, development = false}: {layout: string, callback?: Function, profile_id: profile.ProfileSelect, development: boolean}) {
         const devices = HID.devices();
         this.development = development;
         this.keyboard = this.development ? undefined : new HID.HID(devices.filter(x => x.path && x.productId == 0x2057 && x.interface == 1 && x.path.includes("col05"))[0].path!);
